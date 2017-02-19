@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Richard-路虽远，无所畏</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="keywords" content="前端知识 , CSS , javascript , jquery，react, react native, 袁志荣博客, 尔后不再希冀">
+  <meta name="descripton" content="袁志荣、尔后不再希冀、Richard个人博客。记录本人工作中遇到的问题，以及经验总结和分享！">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/yzr.css">
+</head>
+<body>
+
+
+<div id="container" class="logo"></div>
+<header id="h_small">
+    <nav id="nav_small"><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a
+            href="/#Blog">博客</a><a href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+</header>
+
+
+<script type="text/javascript">
+    // needs to be a string for jquery.cookie
+    var postId = '1';
+    $(function()
+    {
+        // initialize kudos
+        $("figure.kudoable").kudoable();
+        // check to see if user has already kudod
+        // fyi cookies do not work when you are viewing this as a file
+        if($.cookie(postId) == 'true') {
+            // make kudo already kudod
+            $("figure.kudoable").removeClass("animate").addClass("complete");
+            // your server would take care of the proper kudos count, but because this is a
+            // static page, we need to set it here so it doesn't become -1 when you remove
+            // the kudos after a reload
+            $(".num").html(1);
+        }
+        // when kudoing
+        $("figure.kudo").bind("kudo:active", function(e)
+        {
+            console.log("kudoing active");
+        });
+        // when not kudoing
+        $("figure.kudo").bind("kudo:inactive", function(e)
+        {
+            console.log("kudoing inactive");
+        });
+        // after kudo'd
+        $("figure.kudo").bind("kudo:added", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Kodo'd:", element.data('id'), ":)");
+            // set cookie so user cannot kudo again for 7 days
+            $.cookie(postId, 'true', { expires: 7 });
+        });
+        // after removing a kudo
+        $("figure.kudo").bind("kudo:removed", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Un-Kudo'd:", element.data('id'), ":(");
+            // remove cookie
+            $.removeCookie(postId);
+        });
+    });
+</script>
+
+
+
+<div class="post-header">
+  <h1 class="post-title">封装绑定事件函数</h1>
+</div>
+<div class="post-header">
+  <p class="post-meta">February 19, 2017 — 00:51</p>
+</div>
+
+<div class="post-wrapper">
+
+
+
+  <article class="post-content">
+    <div class = "blurb-blog">
+      <div class="highlight"><pre><code class="language-" data-lang="">function bind(obj,evName,fn) {
+    if(obj.addEventListener){
+        obj.addEventListener(evName,fn,false);
+    }else{
+        obj.attachEvent("on"+evName,function(){
+            fn.call(obj);
+        })
+    }
+}
+</code></pre></div>
+<p>详解：
+<ul>
+    <li>1.obj.事件  这种方法只能绑定一个事件；</li>
+    <li>2.注意：attactEvent绑定事件时，事件名称需要加上&quot;on&quot;；</li>
+    <li>3.obj.addEventListener事件绑定方法只在标准浏览器才有，IE8以下需要采用obj.attachEvent;</li>
+    <li>4.obj.attachEvent绑定的事件方法中 this指向window,需要调用call方法改变this指向。</li>
+</ul></p>
+
+    </div>
+  </article>
+
+
+</div>
+<!--<div class="comment">-->
+<!---->
+<!--</div>-->
+<div class="comment_yzr post-wrapper">
+  <!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key=/blog/2017/02/19/Blog-entry-one data-title=封装绑定事件函数 data-url="https://zhirongyuan.github.io/blog/2017/02/19/Blog-entry-one.html"></div>
+  <!-- 多说评论框 end -->
+  <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+  <script type="text/javascript">
+      var duoshuoQuery = {short_name:"zhirongyuan"};
+      (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+  </script>
+  <!-- 多说公共JS代码 end -->
+</div>
+<footer>
+    <div class="lockup">
+        <div class="logo"></div>
+        <div class="content-wrap">
+            <nav><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a href="/#Blog">博客</a><a
+                    href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+            <p class="copyright">尔后不再希冀 Richard 2017</p></div>
+    </div>
+</footer>
+<script src="/assets/js/jquery-3.1.1.min.js"></script>
+<script src="/assets/js/functions.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/modernizr.js"></script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-70467029-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+</body>
+</html>
+

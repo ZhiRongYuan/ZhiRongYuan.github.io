@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Richard-路虽远，无所畏</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="keywords" content="前端知识 , CSS , javascript , jquery，react, react native, 袁志荣博客, 尔后不再希冀">
+  <meta name="descripton" content="袁志荣、尔后不再希冀、Richard个人博客。记录本人工作中遇到的问题，以及经验总结和分享！">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/yzr.css">
+</head>
+<body>
+
+
+<div id="container" class="logo"></div>
+<header id="h_small">
+    <nav id="nav_small"><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a
+            href="/#Blog">博客</a><a href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+</header>
+
+
+<script type="text/javascript">
+    // needs to be a string for jquery.cookie
+    var postId = '1';
+    $(function()
+    {
+        // initialize kudos
+        $("figure.kudoable").kudoable();
+        // check to see if user has already kudod
+        // fyi cookies do not work when you are viewing this as a file
+        if($.cookie(postId) == 'true') {
+            // make kudo already kudod
+            $("figure.kudoable").removeClass("animate").addClass("complete");
+            // your server would take care of the proper kudos count, but because this is a
+            // static page, we need to set it here so it doesn't become -1 when you remove
+            // the kudos after a reload
+            $(".num").html(1);
+        }
+        // when kudoing
+        $("figure.kudo").bind("kudo:active", function(e)
+        {
+            console.log("kudoing active");
+        });
+        // when not kudoing
+        $("figure.kudo").bind("kudo:inactive", function(e)
+        {
+            console.log("kudoing inactive");
+        });
+        // after kudo'd
+        $("figure.kudo").bind("kudo:added", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Kodo'd:", element.data('id'), ":)");
+            // set cookie so user cannot kudo again for 7 days
+            $.cookie(postId, 'true', { expires: 7 });
+        });
+        // after removing a kudo
+        $("figure.kudo").bind("kudo:removed", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Un-Kudo'd:", element.data('id'), ":(");
+            // remove cookie
+            $.removeCookie(postId);
+        });
+    });
+</script>
+
+
+
+<div class="post-header">
+  <h1 class="post-title">阻止冒泡事件和默认事件</h1>
+</div>
+<div class="post-header">
+  <p class="post-meta">February 19, 2017 — 04:51</p>
+</div>
+
+<div class="post-wrapper">
+
+
+
+  <article class="post-content">
+    <div class = "blurb-blog">
+      <p>使用 JavaScript 时为了达到预期效果经常需要阻止事件和动作执行. 一般我们会用到三种方法,
+分别是 stopPropagation(), preventDefault() 和 return false. 它们之间有什么区别, 该何时使用呢? 将在本文中进行讲解.</p>
+
+<p><a style="color:red">术语</a>
+<p>监听事件, 在在节点上能被监听的页面操作. 如: select 节点的 change 事件, a 节点的 click 事件.
+浏览器默认动作, 指特定页面元素上带有的功能. 如: 点击 a 链接节点的跳转动作, 表单提交动作.</p></p>
+
+<p><a style="color:red">stopPropagation();</a>
+<p>因为事件可以在各层级的节点中传递, 不管是冒泡还是捕获, 有时我们希望事件在特定节点执行完之后不再传递,
+可以使用事件对象的 stopPropagation() 方法.</p><p>假设页面上存在一个浮动弹出层, 显示在最前面, 当点击弹出层以
+外页面区域时, 隐藏弹出层. 为了做到这样的效果, 我们会监听 documentElement 的 click 事件, 一旦事件被
+触发即隐藏弹出层. 但是...这显然存在问题. 当用户点击弹出层时, 我们不希望它隐藏掉. 但因为事件的冒泡传递,
+ documentElement 的 click 事件也会被触发. 这个时候, 我们可以监听弹出层的 click 事件,
+ 并使用 stopPropagation()方法阻止冒泡. 请参考下面的代码.</p></p>
+<div class="highlight"><pre><code class="language-" data-lang="">// 在弹出对话框上点击时, 不进行任何页面操作, 并阻止冒泡
+document.getElementById('dialog').onclick = function(ev) {
+    ev.stopPropagation();
+};
+</code></pre></div><div class="highlight"><pre><code class="language-" data-lang="">// 在 documentElement 节点上监听到点击事件时, 隐藏对话框
+document.documentElement.onclick = function(ev) {
+    document.getElementById('dialog').style.display = 'none';
+};
+</code></pre></div>
+<p>stopPropagation() 相当好用, 可是 IE8 及以前版本都不支持. IE 的事件对象包含特有的属性 cancelBubble,
+只要将它赋值为 false 即可阻止事件继续. 如:</p>
+<div class="highlight"><pre><code class="language-" data-lang="">// 在弹出对话框上点击时, 不进行任何页面操作, 并阻止冒泡
+document.getElementById('dialog').onclick = function(ev) {
+    ev.cancelBubble = false;
+};
+</code></pre></div>
+<p><a style="color:red">preventDefault()</a>
+<p>一个带事件监听的链接代码如下:</p></p>
+<div class="highlight"><pre><code class="language-" data-lang="">&lt;a href="http://w3c.org" onclick="alert('JavaScript Click Event');"&gt;点击链接&lt;/a&gt;
+</code></pre></div>
+<p>点击该链接, 显示对话框后跳转页面. 由此可知, 除了执行监听事件还会触发浏览器默认动作; 执行监听事件在前,
+触发浏览器默认动作在后.这里有个经典示例, 我们希望点击链接在新窗口打开页面, 但不希望当前页面跳转. 这个时候
+可以使用 preventDefault() 阻止后面将要执行的浏览器默认动作.</p>
+<div class="highlight"><pre><code class="language-" data-lang="">&lt;a id="link" href="http://w3c.org"&gt;W3C 首页链接&lt;/a&gt;
+</code></pre></div><div class="highlight"><pre><code class="language-" data-lang="">&lt;script&gt;
+// 在新窗口, 打开页面
+document.getElementById('link').onclick = function(ev) {
+    // 阻止浏览器默认动作 (页面跳转)
+    ev.preventDefault();
+    // 在新窗口打开页面
+    window.open(this.href);
+};
+&lt;/script&gt;
+</code></pre></div>
+<p><a style="color:red">return false</a>
+<p>退出执行, return false 之后的所有触发事件和动作都不会被执行. 有时候 return false 可以用来替代
+stopPropagation() 和 preventDefault(), 比如我们上面新窗口打开链接的例子, 如:</p></p>
+<div class="highlight"><pre><code class="language-" data-lang="">&lt;a id="link" href="http://w3c.org"&gt;W3C 首页链接&lt;/a&gt;
+</code></pre></div><div class="highlight"><pre><code class="language-" data-lang="">&lt;script&gt;
+// 在新窗口, 打开页面
+document.getElementById('link').onclick = function(ev) {
+    // 在新窗口打开页面
+    window.open(this.href);
+    // 退出执行 (在监听事件之后执行的浏览器默认动作将不会被执行)
+    return false;
+};
+&lt;/script&gt;
+</code></pre></div>
+<p>有人认为 return false = stopPropagation() + preventDefault(), 其实是错的. return false 不但阻止事件,
+ 还可以返回对象, 跳出循环等... 方便地一刀切而不够灵活, 滥用易出错.</p>
+
+    </div>
+  </article>
+
+
+</div>
+<!--<div class="comment">-->
+<!---->
+<!--</div>-->
+<div class="comment_yzr post-wrapper">
+  <!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key=/blog/2017/02/19/Blog-entry-two data-title=阻止冒泡事件和默认事件 data-url="https://zhirongyuan.github.io/blog/2017/02/19/Blog-entry-two.html"></div>
+  <!-- 多说评论框 end -->
+  <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+  <script type="text/javascript">
+      var duoshuoQuery = {short_name:"zhirongyuan"};
+      (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+  </script>
+  <!-- 多说公共JS代码 end -->
+</div>
+<footer>
+    <div class="lockup">
+        <div class="logo"></div>
+        <div class="content-wrap">
+            <nav><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a href="/#Blog">博客</a><a
+                    href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+            <p class="copyright">尔后不再希冀 Richard 2017</p></div>
+    </div>
+</footer>
+<script src="/assets/js/jquery-3.1.1.min.js"></script>
+<script src="/assets/js/functions.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/modernizr.js"></script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-70467029-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+</body>
+</html>
+
