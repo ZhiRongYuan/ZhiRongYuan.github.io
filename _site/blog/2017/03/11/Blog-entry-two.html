@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Richard-路虽远，无所畏</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="keywords" content="前端知识 , CSS , javascript , jquery，react, react native, 袁志荣博客, 尔后不再希冀">
+  <meta name="descripton" content="袁志荣、尔后不再希冀、Richard个人博客。记录本人工作中遇到的问题，以及经验总结和分享！">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/yzr.css">
+</head>
+<body>
+
+
+<div id="container" class="logo"></div>
+<header id="h_small">
+    <nav id="nav_small"><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a
+            href="/#Blog">博客</a><a href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+</header>
+
+
+<script type="text/javascript">
+    // needs to be a string for jquery.cookie
+    var postId = '1';
+    $(function()
+    {
+        // initialize kudos
+        $("figure.kudoable").kudoable();
+        // check to see if user has already kudod
+        // fyi cookies do not work when you are viewing this as a file
+        if($.cookie(postId) == 'true') {
+            // make kudo already kudod
+            $("figure.kudoable").removeClass("animate").addClass("complete");
+            // your server would take care of the proper kudos count, but because this is a
+            // static page, we need to set it here so it doesn't become -1 when you remove
+            // the kudos after a reload
+            $(".num").html(1);
+        }
+        // when kudoing
+        $("figure.kudo").bind("kudo:active", function(e)
+        {
+            console.log("kudoing active");
+        });
+        // when not kudoing
+        $("figure.kudo").bind("kudo:inactive", function(e)
+        {
+            console.log("kudoing inactive");
+        });
+        // after kudo'd
+        $("figure.kudo").bind("kudo:added", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Kodo'd:", element.data('id'), ":)");
+            // set cookie so user cannot kudo again for 7 days
+            $.cookie(postId, 'true', { expires: 7 });
+        });
+        // after removing a kudo
+        $("figure.kudo").bind("kudo:removed", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Un-Kudo'd:", element.data('id'), ":(");
+            // remove cookie
+            $.removeCookie(postId);
+        });
+    });
+</script>
+
+
+
+<div class="post-header">
+  <h1 class="post-title">React 克隆组件  -----   React.cloneElement</h1>
+</div>
+<div class="post-header">
+  <p class="post-meta">March 11, 2017 — 05:58</p>
+</div>
+
+<div class="post-wrapper">
+
+
+
+  <article class="post-content">
+    <div class = "blurb-blog">
+      <p>
+上一周公司项目要求实现按钮级权限,简单来说就是需要通过后台数据绑定来控制前端页面哪些操作按钮需要渲染,哪些操作按钮不
+需要渲染,这可为难了我好些天啊,那么多页面,想想头疼,好在现在方案已经想出来了,大体的方案是:在原有的按钮标签外再套一层 按钮权限控制
+标签,然后没个具体的按钮对照后台给定的唯一值传入到这个"按钮权限控制"组件,然后在组件中 判断改按钮该不该渲染,之中用到的一个技术
+点就是React.cloneElement,可以修改子元素的属性值,废话不讲,具体说说React.cloneElement吧
+</p>
+
+<p>
+     <a style="color:red">React.cloneElement</a>
+     <ul>
+        <li>
+        参数：TYPE（ReactElement），[PROPS（object）]，[CHILDREN（ReactElement）]
+        </li>
+        <li>
+        克隆并返回一个新的 ReactElement （内部子元素也会跟着克隆），新返回的元素会保留有旧元素的 props、ref、key，也会集成新的 props（只要在第二个参数中有定义）。
+        </li>
+     </ul>
+</p>
+<div class="highlight"><pre><code class="language-" data-lang="">var Hello = React.createClass({
+            render: function() {
+                var span = &lt;span a="1"&gt;VaJoy&lt;/span&gt;;
+                var newSpan = React.cloneElement(span, {b:'2'}, &lt;em&gt;CNBlog&lt;/em&gt;);
+                console.log(newSpan.props);
+                return &lt;div&gt;Hello {span},{newSpan}&lt;/div&gt;; //Hello VaJoy,CNBlog
+            }
+        });
+
+        React.render(&lt;Hello /&gt;, document.body);
+</code></pre></div>
+<p>
+要注意的是，createElement 的第一个参数必须是字符串或 ReactClass，而在 cloneElement 里第一个参数应该是 ReactElement：
+</p>
+<div class="highlight"><pre><code class="language-" data-lang="">var Li = React.createClass({
+            render: function() {
+                return &lt;li&gt;{this.props.i}&lt;/li&gt;
+            }
+        });
+        var Ul = React.createClass({
+            deal : function(child, index){
+                //注意下面这行换成 createElement 会报错！因为child是ReactElement而不是ReactClass或字符串
+                return React.cloneElement(child, {i:index});
+            },
+            render: function() {
+                return &lt;ul&gt;{this.props.children.map(this.deal)}&lt;/ul&gt;;
+            }
+        });
+        React.render((
+            &lt;Ul&gt;
+                &lt;Li i="9" /&gt;
+                &lt;Li i="8" /&gt;
+                &lt;Li i="7" /&gt;
+            &lt;/Ul&gt;
+        ), document.body);
+</code></pre></div>
+    </div>
+  </article>
+
+
+</div>
+<!--<div class="comment">-->
+<!---->
+<!--</div>-->
+<div class="comment_yzr post-wrapper">
+  <!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key=/blog/2017/03/11/Blog-entry-two data-title=React 克隆组件  -----   React.cloneElement data-url="https://zhirongyuan.github.io/blog/2017/03/11/Blog-entry-two.html"></div>
+  <!-- 多说评论框 end -->
+  <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+  <script type="text/javascript">
+      var duoshuoQuery = {short_name:"zhirongyuan"};
+      (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+  </script>
+  <!-- 多说公共JS代码 end -->
+</div>
+<footer>
+    <div class="lockup">
+        <div class="logo"></div>
+        <div class="content-wrap">
+            <nav><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a href="/#Blog">博客</a><a
+                    href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+            <p class="copyright">尔后不再希冀 Richard 2017</p></div>
+    </div>
+</footer>
+<script src="/assets/js/jquery-3.1.1.min.js"></script>
+<script src="/assets/js/functions.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/modernizr.js"></script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-70467029-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+</body>
+</html>
+
