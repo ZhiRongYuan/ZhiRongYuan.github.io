@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Richard-路虽远，无所畏</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="keywords" content="前端知识 , CSS , javascript , jquery，react, react native, 袁志荣博客, 尔后不再希冀">
+  <meta name="descripton" content="袁志荣、尔后不再希冀、Richard个人博客。记录本人工作中遇到的问题，以及经验总结和分享！">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/yzr.css">
+</head>
+<body>
+
+
+<div id="container" class="logo"></div>
+<header id="h_small">
+    <nav id="nav_small"><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a
+            href="/#Blog">博客</a><a href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+</header>
+
+
+<script type="text/javascript">
+    // needs to be a string for jquery.cookie
+    var postId = '1';
+    $(function()
+    {
+        // initialize kudos
+        $("figure.kudoable").kudoable();
+        // check to see if user has already kudod
+        // fyi cookies do not work when you are viewing this as a file
+        if($.cookie(postId) == 'true') {
+            // make kudo already kudod
+            $("figure.kudoable").removeClass("animate").addClass("complete");
+            // your server would take care of the proper kudos count, but because this is a
+            // static page, we need to set it here so it doesn't become -1 when you remove
+            // the kudos after a reload
+            $(".num").html(1);
+        }
+        // when kudoing
+        $("figure.kudo").bind("kudo:active", function(e)
+        {
+            console.log("kudoing active");
+        });
+        // when not kudoing
+        $("figure.kudo").bind("kudo:inactive", function(e)
+        {
+            console.log("kudoing inactive");
+        });
+        // after kudo'd
+        $("figure.kudo").bind("kudo:added", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Kodo'd:", element.data('id'), ":)");
+            // set cookie so user cannot kudo again for 7 days
+            $.cookie(postId, 'true', { expires: 7 });
+        });
+        // after removing a kudo
+        $("figure.kudo").bind("kudo:removed", function(e)
+        {
+            var element = $(this);
+            // ajax'y stuff or whatever you want
+            console.log("Un-Kudo'd:", element.data('id'), ":(");
+            // remove cookie
+            $.removeCookie(postId);
+        });
+    });
+</script>
+
+
+
+<div class="post-header">
+  <h1 class="post-title">历史管理-在一个页面实现前进后退</h1>
+</div>
+<div class="post-header">
+  <p class="post-meta">March 29, 2017 — 06:58</p>
+</div>
+
+<div class="post-wrapper">
+
+
+
+  <article class="post-content">
+    <div class = "blurb-blog">
+      <p>
+   Q:假设有一个需求,要求前进后退到用户前一次操作状态的页面,如何实现呢?接下来看例子
+</p>
+<div class="highlight"><pre><code class="language-" data-lang="">&lt;body&gt;
+    &lt;button id="btn"&gt;35选7&lt;/button&gt;
+    &lt;div id="wrap"&gt;&lt;/div&gt;
+    &lt;script&gt;
+        var oWrap=document.getElementById("wrap");
+        var oBtn=document.getElementById("btn");
+        oBtn.onclick=function(){
+
+            oWrap.innerHTML=getRandomData(35,7).join();
+            window.location.hash=getRandomData(35,7).join();//设置hash值  IE8以下不兼容
+        }
+        window.onhashchange=function(){//hash值变化时  触发
+            var num=window.location.hash.substring(1);
+            oWrap.innerHTML=num;
+        }
+        function getRandomData(all,num){
+            var allData=[];
+            var getData=[];
+            for(var i=1;i&lt;=all;i++){
+                allData.push(i);
+            }
+
+            for(var i=0;i&lt;num;i++){
+                getData.push(allData.splice(Math.floor(Math.random()*allData.length),1))
+            }
+
+            return getData;
+            console.log(getData)
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre></div>
+<p>接下来 利用H5的history实现同样的问题(IE10以上才支持)</p>
+<div class="highlight"><pre><code class="language-" data-lang="">&lt;body&gt;
+    &lt;button id="btn"&gt;35选7&lt;/button&gt;
+    &lt;div id="wrap"&gt;&lt;/div&gt;
+    &lt;script&gt;
+        var oWrap=document.getElementById("wrap");
+        var oBtn=document.getElementById("btn");
+        oBtn.onclick=function(){
+
+            oWrap.innerHTML=getRandomData(35,7).join();
+            history.pushState(getRandomData(35,7).join(),null);
+        }
+        window.onpopstate=function(ev){
+            var num=ev.state;
+            oWrap.innerHTML=num;
+        }
+        function getRandomData(all,num){
+            var allData=[];
+            var getData=[];
+            for(var i=1;i&lt;=all;i++){
+                allData.push(i);
+            }
+
+            for(var i=0;i&lt;num;i++){
+                getData.push(allData.splice(Math.floor(Math.random()*allData.length),1))
+            }
+
+            return getData;
+            console.log(getData)
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre></div>
+    </div>
+  </article>
+
+
+</div>
+<!--<div class="comment">-->
+<!---->
+<!--</div>-->
+<div class="comment_yzr post-wrapper">
+  <!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key=/blog/2017/03/29/Blog-entry-two data-title=历史管理-在一个页面实现前进后退 data-url="https://zhirongyuan.github.io/blog/2017/03/29/Blog-entry-two.html"></div>
+  <!-- 多说评论框 end -->
+  <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+  <script type="text/javascript">
+      var duoshuoQuery = {short_name:"zhirongyuan"};
+      (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+  </script>
+  <!-- 多说公共JS代码 end -->
+</div>
+<footer>
+    <div class="lockup">
+        <div class="logo"></div>
+        <div class="content-wrap">
+            <nav><a href="/#about-me">关于我</a><a href="/#Experenice">我的经历</a><a href="/#Blog">博客</a><a
+                    href="/#Details">联系我</a><a href="/#Common">留言板</a></nav>
+            <p class="copyright">尔后不再希冀 Richard 2017</p></div>
+    </div>
+</footer>
+<script src="/assets/js/jquery-3.1.1.min.js"></script>
+<script src="/assets/js/functions.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/modernizr.js"></script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-70467029-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+</body>
+</html>
+
